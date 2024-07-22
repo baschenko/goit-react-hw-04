@@ -9,13 +9,14 @@ const App = () => {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [page, setPage] = useState(0);
   useEffect(() => {
     const getData = async () => {
       try {
         setIsLoading(true);
         setIsError(false);
-        const response = await fetchPhotos(query, 20);
-        setPhotos(response.results);
+        const response = await fetchPhotos(query, page, 3);
+        setPhotos(prev => [...prev, ...response.results]);
       } catch (error) {
         console.log(error);
         setIsError(true);
@@ -26,7 +27,7 @@ const App = () => {
     if (query !== '') {
       getData();
     }
-  }, [query]);
+  }, [page, query]);
 
   return (
     <div>
@@ -34,6 +35,14 @@ const App = () => {
       <ImageGallery photos={photos} />
       {isLoading && <Loader />}
       {isError && <h2>Something went wrong! Try again...</h2>}
+      <button
+        type="button"
+        onClick={() => {
+          setPage(prev => prev + 1);
+        }}
+      >
+        Load more
+      </button>
     </div>
   );
 };
