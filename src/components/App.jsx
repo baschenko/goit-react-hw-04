@@ -9,7 +9,7 @@ const App = () => {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   useEffect(() => {
     const getData = async () => {
       try {
@@ -29,9 +29,15 @@ const App = () => {
     }
   }, [page, query]);
 
+  const handleSetQuery = query => {
+    setQuery(query);
+    setPhotos([]);
+    setPage(1);
+  };
+
   return (
     <div>
-      <SearchBar onSubmit={setQuery} />
+      <SearchBar onSubmit={handleSetQuery} />
       <ImageGallery photos={photos} />
       {isLoading && <Loader />}
       {isError && <h2>Something went wrong! Try again...</h2>}
