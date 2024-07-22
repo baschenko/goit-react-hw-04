@@ -8,14 +8,17 @@ const App = () => {
   const [photos, setPhotos] = useState([]);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
   useEffect(() => {
     const getData = async () => {
       try {
         setIsLoading(true);
+        setIsError(false);
         const response = await fetchPhotos(query, 20);
         setPhotos(response.results);
       } catch (error) {
         console.log(error);
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
@@ -30,6 +33,7 @@ const App = () => {
       <SearchBar onSubmit={setQuery} />
       <ImageGallery photos={photos} />
       {isLoading && <Loader />}
+      {isError && <h2>Something went wrong! Try again...</h2>}
     </div>
   );
 };
