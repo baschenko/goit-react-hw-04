@@ -70,7 +70,6 @@ const App = () => {
     setAlt(alt);
     setModalUrl(url);
     setUser(user);
-    console.log('user: ', user);
   };
 
   const closeModal = () => {
