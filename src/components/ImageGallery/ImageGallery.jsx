@@ -1,16 +1,19 @@
 import ImageCard from '../ImageCard/ImageCard';
+import s from './ImageGallery.module.css';
 
-const ImageGallery = ({ photos }) => {
+const ImageGallery = ({ photos, openModal }) => {
   return (
     <div>
-      <ul>
+      <ul className={s.list}>
         {/* Набір елементів списку із зображеннями */}
-        {photos.map(photo => {
+        {photos.map(({ id, urls, alt_description, color }) => {
           return (
-            <li key={photo.id}>
+            <li key={id} className={s.item}>
               <ImageCard
-                urlImg={photo.urls.small}
-                title={photo.alt_description}
+                urlImg={urls}
+                title={alt_description}
+                color={color}
+                openModal={openModal}
               />
             </li>
           );

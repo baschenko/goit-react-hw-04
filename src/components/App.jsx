@@ -3,22 +3,35 @@ import SearchBar from './SearchBar/SearchBar';
 import { fetchPhotos } from '../services/api';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Loader from './Loader/Loader';
+import ImageModal from './ImageModal/ImageModal';
+import s from './App.module.css';
 
 const App = () => {
   const [photos, setPhotos] = useState([]);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [modalUrl, setModalUrl] = useState('');
+  const [alt, setAlt] = useState('');
+
   useEffect(() => {
     const getData = async () => {
+      if (!query) {
+        return;
+      }
       try {
         setIsLoading(true);
         setIsError(false);
-        const response = await fetchPhotos(query, page, 10);
-        setPhotos(prev => [...prev, ...response.results]);
-        setTotalPages(response.total_pages);
+        const { results, total_pages } = await fetchPhotos(query, page);
+        if (!results.length) {
+          return setIsError(true);
+        }
+        setPhotos(prev => [...prev, ...results]);
+
+        setTotalPages(total_pages);
       } catch (error) {
         console.log(error);
         setIsError(true);
@@ -26,33 +39,59 @@ const App = () => {
         setIsLoading(false);
       }
     };
-    if (query !== '') {
-      getData();
-    }
+
+    getData();
   }, [page, query]);
 
   const handleSetQuery = query => {
     setQuery(query);
     setPhotos([]);
     setPage(1);
+    setIsError(null);
+    setTotalPages(0);
+  };
+
+  const loadMore = () => {
+    setPage(prev => prev + 1);
+  };
+
+  const openModal = (url, alt) => {
+    setShowModal(true);
+    setAlt(alt);
+    setModalUrl(url);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setAlt('');
+    setModalUrl('');
   };
 
   return (
-    <div>
+    <div className={s.container}>
       <SearchBar onSubmit={handleSetQuery} />
-      <ImageGallery photos={photos} />
+      {isError && (
+        <h2 className={s.header}>Something went wrong! Try again...</h2>
+      )}
+      {photos && <ImageGallery photos={photos} openModal={openModal} />}
+
       {isLoading && <Loader />}
-      {isError && <h2>Something went wrong! Try again...</h2>}
       {totalPages > page && !isLoading && (
         <button
           type="button"
-          onClick={() => {
-            setPage(prev => prev + 1);
-          }}
+          onClick={loadMore}
+          disabled={isLoading}
+          className={s.btn}
         >
           Load more
         </button>
       )}
+      <ImageModal
+        modalIsOpen={showModal}
+        closeModal={closeModal}
+        src={modalUrl}
+        alt={alt}
+      />
     </div>
   );
 };
