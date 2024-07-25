@@ -5,6 +5,9 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import Loader from './Loader/Loader';
 import ImageModal from './ImageModal/ImageModal';
 import s from './App.module.css';
+import LoadMoreBtn from './LoadMoreBtn/LoadMoreBtn';
+import ErrorMessage from './ErrorMessage/ErrorMessage';
+import toast, { Toaster } from 'react-hot-toast';
 
 const App = () => {
   const [photos, setPhotos] = useState([]);
@@ -16,49 +19,58 @@ const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalUrl, setModalUrl] = useState('');
   const [alt, setAlt] = useState('');
+  const [user, setUser] = useState({});
 
   useEffect(() => {
+    // оголошуэмо функцію по запросу фото з серверу
     const getData = async () => {
+      // відключаємо useEffect доки не зявиться query
       if (!query) {
         return;
       }
       try {
-        setIsLoading(true);
-        setIsError(false);
-        const { results, total_pages } = await fetchPhotos(query, page);
+        setIsLoading(true); //включаємо спінер
+        const { results, total_pages, total } = await fetchPhotos(query, page); //запрос на сервер АРІ
         if (!results.length) {
-          return setIsError(true);
+          throw new Error(`Oops! "${query}" - нема таких світлин`); //создаємо error, якщо повернувся пустий об'єкт
         }
-        setPhotos(prev => [...prev, ...results]);
+        setPhotos(prev => [...prev, ...results]); // добавляємо нові фото для виводу у стейт
+        const notify = () =>
+          toast(`Знайшли ${total} фото. Зараз ${page} з ${total_pages} стор.`); // формуємо повідомлення про сторінки і фото
+        notify(); // виводимо повідомлення
 
-        setTotalPages(total_pages);
+        setTotalPages(total_pages); // записуємо у стейт загальну кількість сторінок
       } catch (error) {
-        console.log(error);
-        setIsError(true);
+        console.log(error); //виводимо error у консоль
+        setIsError(error); //зберігаємо error у стейт
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); //виключаємо спінер
       }
     };
 
-    getData();
+    getData(); //запускаємо функцію
   }, [page, query]);
 
+  // Новий query і обнуляємо стейт
   const handleSetQuery = query => {
     setQuery(query);
     setPhotos([]);
     setPage(1);
     setIsError(null);
     setTotalPages(0);
+    setUser({});
   };
 
   const loadMore = () => {
     setPage(prev => prev + 1);
   };
 
-  const openModal = (url, alt) => {
+  const openModal = (url, alt, user) => {
     setShowModal(true);
     setAlt(alt);
     setModalUrl(url);
+    setUser(user);
+    console.log('user: ', user);
   };
 
   const closeModal = () => {
@@ -70,27 +82,28 @@ const App = () => {
   return (
     <div className={s.container}>
       <SearchBar onSubmit={handleSetQuery} />
-      {isError && (
-        <h2 className={s.header}>Something went wrong! Try again...</h2>
-      )}
+      {isError && <ErrorMessage>{isError.message}</ErrorMessage>}
       {photos && <ImageGallery photos={photos} openModal={openModal} />}
 
       {isLoading && <Loader />}
       {totalPages > page && !isLoading && (
-        <button
-          type="button"
-          onClick={loadMore}
-          disabled={isLoading}
-          className={s.btn}
-        >
+        <LoadMoreBtn onClick={loadMore} disabled={isLoading}>
           Load more
-        </button>
+        </LoadMoreBtn>
       )}
       <ImageModal
         modalIsOpen={showModal}
         closeModal={closeModal}
         src={modalUrl}
         alt={alt}
+        author={user.name}
+        likes={user.total_likes}
+      />
+      <Toaster
+        containerStyle={{
+          top: 70,
+          left: 20,
+        }}
       />
     </div>
   );

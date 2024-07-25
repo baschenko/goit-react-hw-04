@@ -6,13 +6,14 @@ const ImageGallery = ({ photos, openModal }) => {
     <div>
       <ul className={s.list}>
         {/* Набір елементів списку із зображеннями */}
-        {photos.map(({ id, urls, alt_description, color }) => {
+        {photos.map(({ id, urls, alt_description, color, user }) => {
           return (
             <li key={id} className={s.item}>
               <ImageCard
                 urlImg={urls}
                 title={alt_description}
                 color={color}
+                user={user}
                 openModal={openModal}
               />
             </li>

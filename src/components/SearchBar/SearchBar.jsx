@@ -33,9 +33,14 @@ const SearchBar = ({ onSubmit }) => {
             placeholder="Search images and photos"
             className={s.inputSearch}
           />
-          <Toaster />
         </Form>
       </Formik>
+      <Toaster
+        containerStyle={{
+          top: 70,
+          left: 20,
+        }}
+      />
     </div>
   );
 };

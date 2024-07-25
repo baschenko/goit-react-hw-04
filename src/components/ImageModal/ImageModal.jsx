@@ -1,4 +1,6 @@
 import Modal from 'react-modal';
+import { SlLike } from 'react-icons/sl';
+import s from './ImageModal.module.css';
 
 const customStyles = {
   content: {
@@ -14,7 +16,7 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-const ImageModal = ({ modalIsOpen, closeModal, src, alt }) => {
+const ImageModal = ({ modalIsOpen, closeModal, src, alt, author, likes }) => {
   return (
     <Modal
       isOpen={modalIsOpen}
@@ -22,7 +24,17 @@ const ImageModal = ({ modalIsOpen, closeModal, src, alt }) => {
       style={customStyles}
       contentLabel="Example Modal"
     >
+      <h2>{alt}</h2>
       <img src={src} alt={alt} />
+      <div className={s.description}>
+        <p>
+          <b>Auth:</b> {author}
+        </p>
+        <p>
+          <SlLike />
+          <b> {likes}</b>
+        </p>
+      </div>
     </Modal>
   );
 };

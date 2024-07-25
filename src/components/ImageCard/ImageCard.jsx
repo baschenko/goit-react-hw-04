@@ -1,6 +1,6 @@
 import s from './ImageCard.module.css';
 
-const ImageCard = ({ urlImg, title, color, openModal }) => {
+const ImageCard = ({ urlImg, title, color, openModal, user }) => {
   return (
     <div
       className={s.thumb}
@@ -10,7 +10,7 @@ const ImageCard = ({ urlImg, title, color, openModal }) => {
         src={urlImg.small}
         alt={title}
         onClick={() => {
-          openModal(urlImg.regular, title);
+          openModal(urlImg.regular, title, user);
         }}
       />
     </div>
